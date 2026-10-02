@@ -1,0 +1,12 @@
+{
+  "last_green": "1bced6f",
+  "bug_commit": "4278cfe",
+  "decoy_head": "673b583",
+  "culprit_file": "utils.py",
+  "culprit_line": 6,
+  "code_fragment": ".strip().lower()",
+  "take": 1,
+  "init_commit": "1bced6f",
+  "guid": "repo-tinyshop-t1",
+  "group_created_at": 1790965595
+}
