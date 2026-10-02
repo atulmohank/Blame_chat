@@ -44,7 +44,7 @@ export default function App() {
     <CometChatProvider>
       <div className="chat">
         <CometChatMessageHeader group={group} />
-        <CometChatMessageList group={group} />
+        <CometChatMessageList group={group} hideGroupActionMessages />
         <CometChatMessageComposer group={group} onSendButtonClick={onSend} hideVoiceRecordingButton hideStickersButton />
       </div>
     </CometChatProvider>

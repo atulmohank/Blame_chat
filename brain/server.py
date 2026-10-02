@@ -1,6 +1,7 @@
 """BlameChat brain. Run: uvicorn server:app --port 8787  (from the brain/ folder)"""
 import asyncio
 import random
+import re
 from datetime import datetime
 
 from fastapi import FastAPI
@@ -9,6 +10,8 @@ from pydantic import BaseModel
 
 import state
 from cometchat import send_text
+from ground import find_culprit
+from template import build_lines
 
 app = FastAPI(title="BlameChat brain")
 app.add_middleware(
@@ -43,11 +46,33 @@ async def post_script(guid, lines):
         log(f"posted {uid}: {text}")
 
 
+BLAME = re.compile(r"\b(broke|break|broken|blame|bug|fail|guilty|culprit)\b", re.I)
+
+
+async def ground_and_post(guid):
+    log("grounding…")
+    evidence = []
+    try:
+        facts = await asyncio.to_thread(find_culprit, evidence=evidence)
+    except Exception as e:
+        for line in evidence:
+            log(line)
+        log(f"grounding failed: {e}")
+        return
+    for line in evidence:
+        log(line)
+    log("asking the files…")
+    await post_script(guid, build_lines(facts))
+
+
 @app.post("/ask")
 async def ask(body: Ask):
     guid = body.guid or state.load().get("guid")
     log(f"atul asked: {body.text!r} (group {guid})")
-    # Day 2 stub: prove the round trip. Day 3 replaces this with the grounded culprit finder.
+    if BLAME.search(body.text):
+        asyncio.create_task(ground_and_post(guid))
+        return {"ok": True, "grounding": True}
+    # Not a blame question: keep the Day 2 hello.
     lines = [("db_py", "hi 👋 db.py here. tired, but present.")]
     asyncio.create_task(post_script(guid, lines))
     return {"ok": True, "queued": len(lines)}
