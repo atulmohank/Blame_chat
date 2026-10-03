@@ -28,7 +28,7 @@ def build_lines(facts):
 
     # 2 Alibi: changed but never ran, and its commit is newer than the culprit's.
     alibis = [c for c in facts.get("changed_not_run", [])
-              if c["file"] not in suspects and c["file"] not in used
+              if c["file"] in FILE_TO_UID and c["file"] not in suspects and c["file"] not in used
               and c["commit_time"] > facts["commit_time"]]
     if alibis:
         alibi = max(alibis, key=lambda c: c["commit_time"])["file"]
@@ -50,4 +50,30 @@ def build_lines(facts):
     else:
         text = f"...ok. commit `{facts['commit']}` '{facts['summary']}' was me 😬"
     lines.append((FILE_TO_UID[culprit], text))
+    return lines
+
+
+def commit_lines(changed, green, imports, culprit=None):
+    """Reactions to a new commit.
+
+    changed: {member file: [new-side changed line numbers]}
+    green:   did the tests pass after the commit?
+    imports: {file: [member files it imports]} (ground.imports_of_members())
+    culprit: file from find_culprit() when still red
+    """
+    lines = []
+
+    # a) Every changed member complains, in members order.
+    for f in ORDER:
+        if changed.get(f):
+            lines.append((FILE_TO_UID[f], f"someone rewrote L{min(changed[f])} of me without asking 😤"))
+
+    # b) Green: the first member that imports a changed file accepts the apology.
+    if green:
+        forgiver = next((f for f in ORDER if any(c in imports.get(f, []) for c in changed)), None)
+        if forgiver:
+            lines.append((FILE_TO_UID[forgiver], "tests green ✅ apology accepted"))
+    # c) Red: the culprit isn't done yet.
+    elif culprit in FILE_TO_UID:
+        lines.append((FILE_TO_UID[culprit], "still red. not done with me yet 😩"))
     return lines

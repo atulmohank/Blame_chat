@@ -17,12 +17,24 @@ def git(*args):
                           capture_output=True, text=True).stdout.strip()
 
 
+HOOK = "#!/bin/sh\ncurl -s -X POST http://localhost:8787/commit >/dev/null 2>&1 &\n"
+
+
+def install_hook():
+    """post-commit -> brain /commit, fire-and-forget. Lives in .git, so history is untouched."""
+    hook = state.REPO / ".git" / "hooks" / "post-commit"
+    hook.write_bytes(HOOK.encode())  # bytes: LF endings even on Windows
+    hook.chmod(0o755)
+    print("post-commit hook installed")
+
+
 def main():
     s = state.load()
     if "--no-git" not in sys.argv:
         git("reset", "--hard", s["decoy_head"])
         git("clean", "-fdq", "-e", "data/users.json")
         print("tinyshop reset to", git("log", "-1", "--format=%h %s"))
+    install_hook()
     s["last_green"] = s.get("init_commit", s["last_green"])
     s["take"] = int(s.get("take", 0)) + 1
     guid = f"repo-tinyshop-t{s['take']}"
