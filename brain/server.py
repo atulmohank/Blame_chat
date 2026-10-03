@@ -46,7 +46,16 @@ async def post_script(guid, lines):
         log(f"posted {uid}: {text}")
 
 
-BLAME = re.compile(r"\b(broke|break|broken|blame|bug|fail|guilty|culprit)\b", re.I)
+BLAME = re.compile(
+    r"\b(broke|break|breaks|broken|blame|bugs?|buggy|fail|fails|failed|failing|guilty|culprit"
+    r"|fault|responsible|trouble\s*maker|who\s+did|did\s+this|what\s+happened|not\s+working"
+    r"|doesn['’]?t\s+work)\b",
+    re.I,
+)
+
+
+def is_blame(text):
+    return bool(BLAME.search(text))
 
 
 async def ground_and_post(guid):
@@ -69,10 +78,10 @@ async def ground_and_post(guid):
 async def ask(body: Ask):
     guid = body.guid or state.load().get("guid")
     log(f"atul asked: {body.text!r} (group {guid})")
-    if BLAME.search(body.text):
+    if is_blame(body.text):
         asyncio.create_task(ground_and_post(guid))
         return {"ok": True, "grounding": True}
-    # Not a blame question: keep the Day 2 hello.
-    lines = [("db_py", "hi 👋 db.py here. tired, but present.")]
+    # Not a blame question: db.py hints at what to ask.
+    lines = [("db_py", "db.py here 😴 if something's broken, ask us who broke it.")]
     asyncio.create_task(post_script(guid, lines))
     return {"ok": True, "queued": len(lines)}
