@@ -2,16 +2,19 @@
 import asyncio
 import random
 import re
+import time
 from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+import llm
 import state
 from cometchat import send_text
 from ground import MEMBER_FILES, find_culprit, git, imports_of_members, parse_diff, run, trace_tests
 from template import build_lines, commit_lines
+from validator import validate
 
 app = FastAPI(title="BlameChat brain")
 app.add_middleware(
@@ -75,8 +78,33 @@ async def ground_and_post(guid):
             return
         for line in evidence:
             log(line)
+        lines = build_lines(facts)
+        if llm.mode() != "template":
+            lines = await banter_lines(facts) or lines
         log("asking the files…")
-        await post_script(guid, build_lines(facts))
+        await post_script(guid, lines)
+
+
+async def banter_lines(facts):
+    """LLM wording for the same facts: validate, retry once, else None (-> template)."""
+    which = llm.mode()
+    log(f"llm: {which} …")
+    hint = None
+    for attempt in (1, 2):
+        t0 = time.perf_counter()
+        try:
+            messages = await asyncio.to_thread(llm.banter, facts, hint)
+        except Exception as e:
+            log(f"llm: attempt {attempt} error: {e}")
+            break
+        ok, reason = validate(messages, facts)
+        if ok:
+            log(f"llm: attempt {attempt} valid ({time.perf_counter() - t0:.1f}s, {len(messages)} messages)")
+            return llm.to_lines(messages)
+        log(f"llm: attempt {attempt} invalid: {reason}")
+        hint = reason
+    log("→ template fallback")
+    return None
 
 
 async def locked_script(guid, lines):
