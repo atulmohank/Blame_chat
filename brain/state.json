@@ -5,8 +5,8 @@
   "culprit_file": "utils.py",
   "culprit_line": 6,
   "code_fragment": ".strip().lower()",
-  "take": 12,
+  "take": 17,
   "init_commit": "1bced6f",
-  "guid": "repo-tinyshop-t12",
-  "group_created_at": 1791001147
+  "guid": "repo-tinyshop-t17",
+  "group_created_at": 1791026392
 }

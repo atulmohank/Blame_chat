@@ -4,6 +4,7 @@ import random
 import re
 import time
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import FastAPI
@@ -18,7 +19,13 @@ from members import FILE_TO_UID
 from template import build_lines, chat_fallback, commit_lines, error_lines, fix_lines, green_line
 from validator import validate, validate_chat
 
-app = FastAPI(title="BlameChat brain")
+@asynccontextmanager
+async def lifespan(_app):
+    asyncio.create_task(refresh_status("startup"))
+    yield
+
+
+app = FastAPI(title="BlameChat brain", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -43,7 +50,52 @@ def session():
 
 
 # One script at a time: an /ask or /commit that arrives mid-script waits its turn.
+# Every pytest run and every git bisect in this process happens under this lock.
 SCRIPT_LOCK = asyncio.Lock()
+
+# Last pytest result, cached. GET /status only reads it; it never runs pytest.
+STATUS = {"state": "unknown", "failed": None, "passed": None, "failing_test": None,
+          "head": None, "source": None, "checked_at": None}
+
+
+def record_status(failed, passed, source, head, failing_test=None):
+    STATUS.update(state="failing" if failed else "passing", failed=failed, passed=passed,
+                  failing_test=failing_test, head=head, source=source,
+                  checked_at=datetime.now().strftime("%H:%M:%S"))
+    log(f"status <- {STATUS['state']} ({failed} failed, {passed} passed) [{source} @ {head}]")
+
+
+def bisect_in_progress():
+    """A git bisect started outside this process (python ground.py --force-bisect)."""
+    return (state.REPO / ".git" / "BISECT_START").exists()
+
+
+async def refresh_status(source):
+    """Run pytest once under the lock and cache the result (startup only)."""
+    async with SCRIPT_LOCK:
+        if bisect_in_progress():
+            log(f"status: skipped {source} check, a git bisect is in progress")
+            return
+        try:
+            head = await asyncio.to_thread(git, "rev-parse", "--short", "HEAD")
+            failed, passed, fails = await asyncio.to_thread(failures)
+        except Exception as e:
+            log(f"status check failed: {e}")
+            return
+        record_status(failed, passed, source, head, fails[0]["test"] if fails else None)
+
+
+@app.get("/status")
+def status():
+    """The cached result. If tinyshop's HEAD moved since that run (reset_take, a commit not yet
+    reacted to), the cache no longer describes the code, so report unknown rather than stale."""
+    try:
+        head = git("rev-parse", "--short", "HEAD")
+    except Exception:
+        head = None
+    if STATUS["head"] and head != STATUS["head"]:
+        return {**STATUS, "state": "unknown", "stale": True, "current_head": head}
+    return STATUS
 
 
 UID_TO_FILE = {uid: f for f, uid in FILE_TO_UID.items()}
@@ -57,11 +109,11 @@ def remember(guid, who, text):
 
 
 async def post_script(guid, lines):
-    """lines = [(uid, text), ...], posted with human-ish gaps."""
-    for i, (uid, text) in enumerate(lines):
+    """lines = [(uid, text) or (uid, text, metadata), ...], posted with human-ish gaps."""
+    for i, (uid, text, *meta) in enumerate(lines):
         if i:
             await asyncio.sleep(random.uniform(1.2, 2.5))
-        await asyncio.to_thread(send_text, uid, guid, text)
+        await asyncio.to_thread(send_text, uid, guid, text, meta[0] if meta else None)
         remember(guid, UID_TO_FILE.get(uid, uid), text)
         log(f"posted {uid}: {text}")
 
@@ -108,11 +160,39 @@ async def grounded_facts(guid, evidence=None):
     return facts
 
 
+PYTEST_EVIDENCE = re.compile(r"^pytest: (\d+) failed(?:, (\d+) passed)?")
+EVIDENCE = {"trace": ["pytest trace", "git diff", "git blame"], "bisect": ["pytest", "git bisect"]}
+
+
+def confession_metadata(facts):
+    """The computed facts behind the confession, for the UI's receipt card (never parsed from prose)."""
+    return {"blamechat": {
+        "kind": "confession",
+        "file": facts["culprit"],
+        "line": facts.get("line"),
+        "fragment": facts.get("code_fragment"),
+        "commit": facts["commit"],
+        "summary": facts.get("summary"),
+        "failing_test": facts.get("failing_test"),
+        "method": facts["method"],
+        "evidence": EVIDENCE.get(facts["method"], []),
+    }}
+
+
+def attach_confession(lines, facts):
+    """The culprit speaks last (template and LLM rules); its line carries the facts."""
+    if lines and lines[-1][0] == FILE_TO_UID.get(facts.get("culprit")):
+        uid, text = lines[-1][:2]
+        lines = [*lines[:-1], (uid, text, confession_metadata(facts))]
+    return lines
+
+
 async def ground_and_post(guid):
     async with SCRIPT_LOCK:
         log("grounding…")
         evidence = []
         try:
+            head = await asyncio.to_thread(git, "rev-parse", "--short", "HEAD")
             facts = await grounded_facts(guid, evidence)
         except Exception as e:
             for line in evidence:
@@ -121,9 +201,14 @@ async def ground_and_post(guid):
             return
         for line in evidence:
             log(line)
+        counts = next((m for m in map(PYTEST_EVIDENCE.match, evidence) if m), None)
+        if counts:  # pytest ran this time (cached facts skip it and leave the status alone)
+            passed = int(counts[2]) if counts[2] is not None else None
+            record_status(int(counts[1]), passed, "ask", head, facts.get("failing_test"))
         lines = build_lines(facts)
         if llm.mode() != "template":
             lines = await banter_lines(facts) or lines
+        lines = attach_confession(lines, facts)
         log("asking the files…")
         await post_script(guid, lines)
 
@@ -154,8 +239,10 @@ async def fix_and_post(guid):
     """Grounded: the culprit spells out the fix computed by ground.py."""
     async with SCRIPT_LOCK:
         try:
-            failed, passed, _ = await asyncio.to_thread(failures)
+            head = await asyncio.to_thread(git, "rev-parse", "--short", "HEAD")
+            failed, passed, fails = await asyncio.to_thread(failures)
             log(f"pytest: {failed} failed, {passed} passed")
+            record_status(failed, passed, "ask", head, fails[0]["test"] if fails else None)
             cached = FACTS.get(guid)
             if not failed:
                 speaker = cached[1]["culprit"] if cached else "db.py"
@@ -182,11 +269,13 @@ async def error_and_post(guid):
     """Grounded: re-run pytest, read out the failing test and its assertion."""
     async with SCRIPT_LOCK:
         try:
+            head = await asyncio.to_thread(git, "rev-parse", "--short", "HEAD")
             failed, passed, fails = await asyncio.to_thread(failures)
         except Exception as e:
             log(f"error check failed: {e}")
             return
         log(f"pytest: {failed} failed, {passed} passed")
+        record_status(failed, passed, "ask", head, fails[0]["test"] if fails else None)
         if not failed or not fails:
             await post_script(guid, green_line("auth.py"))
             return
@@ -271,6 +360,7 @@ async def react_to_commit(commit):
                 return
             failed, passed = await asyncio.to_thread(test_counts)
             log(f"pytest: {failed} failed, {passed} passed")
+            record_status(failed, passed, "commit", commit)
             green, culprit = failed == 0, None
             if green:
                 s = state.load()

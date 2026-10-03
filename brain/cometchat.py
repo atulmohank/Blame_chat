@@ -76,11 +76,14 @@ def create_group(guid, name, owner, participants, description=""):
     })
 
 
-def send_text(sender_uid, guid, text):
+def send_text(sender_uid, guid, text, metadata=None):
+    data = {"text": text}
+    if metadata:
+        data["metadata"] = metadata  # read by the web UI via message.getMetadata()
     return _call("POST", "/messages", {
         "receiver": guid,
         "receiverType": "group",
         "category": "message",
         "type": "text",
-        "data": {"text": text},
+        "data": data,
     }, on_behalf_of=sender_uid)

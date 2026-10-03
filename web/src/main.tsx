@@ -2,7 +2,7 @@ import ReactDOM from "react-dom/client";
 import { CometChatUIKit, UIKitSettingsBuilder } from "@cometchat/chat-uikit-react";
 import "@cometchat/chat-uikit-react/styles";
 import "./index.css";
-import App from "./App";
+import App, { Status } from "./App";
 import { COMETCHAT, MY_UID } from "./config";
 
 const settings = new UIKitSettingsBuilder()
@@ -25,5 +25,6 @@ CometChatUIKit.init(settings)
   })
   .catch((err) => {
     console.error("CometChat init/login failed", err);
-    root.render(<pre style={{ padding: 24 }}>CometChat init/login failed: {String(err?.message ?? err)}</pre>);
+    const detail = `${String(err?.message ?? err)}\nCheck VITE_COMETCHAT_* in web/.env and that setup_cometchat.py created the users.`;
+    root.render(<Status title="BlameChat couldn't sign in to CometChat" detail={detail} />);
   });

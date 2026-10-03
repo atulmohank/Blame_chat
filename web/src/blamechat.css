@@ -1,0 +1,300 @@
+/* BlameChat: Blame Gutter. Dark editor ink, one hue per file, diff red/green only for test state.
+   Everything below themes the real CometChat UI Kit through its tokens and BEM classes. */
+
+:root {
+  --bc-ink: #12161c;
+  --bc-panel: #1a2029;
+  --bc-raised: #212834;
+  --bc-line: #2a323d;
+  --bc-text: #d6dee8;
+  --bc-text-2: #9aa6b5;
+  --bc-text-3: #7d8899;
+  --bc-red: #f0716b;
+  --bc-green: #5bd18b;
+  --bc-code-bg: #0d1117;
+  --bc-hue-0: #7aa2f7; /* auth.py */
+  --bc-hue-1: #e0af68; /* db.py */
+  --bc-hue-2: #f7768e; /* utils.py */
+  --bc-hue-3: #9ece6a; /* cart.py */
+  --bc-hue-4: #bb9af7; /* api.py */
+  --bc-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --bc-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+
+[data-hue="0"] { --hue: var(--bc-hue-0); }
+[data-hue="1"] { --hue: var(--bc-hue-1); }
+[data-hue="2"] { --hue: var(--bc-hue-2); }
+[data-hue="3"] { --hue: var(--bc-hue-3); }
+[data-hue="4"] { --hue: var(--bc-hue-4); }
+
+/* ---------- Kit tokens ---------- */
+.cometchat[data-theme="dark"] {
+  --cometchat-font-family: var(--bc-sans);
+  --cometchat-font-body-regular: 400 15px/1.5 var(--bc-sans);
+  --cometchat-primary-color: var(--bc-text);
+  --cometchat-background-color-01: var(--bc-ink);
+  --cometchat-background-color-02: var(--bc-panel);
+  --cometchat-background-color-03: var(--bc-ink);
+  --cometchat-background-color-04: var(--bc-raised);
+  --cometchat-message-list-bg: var(--bc-ink);
+  --cometchat-neutral-color-300: var(--bc-panel);
+  --cometchat-border-color-light: var(--bc-line);
+  --cometchat-border-color-default: var(--bc-line);
+  --cometchat-border-color-dark: var(--bc-line);
+  --cometchat-text-color-primary: var(--bc-text);
+  --cometchat-text-color-secondary: var(--bc-text-2);
+  --cometchat-text-color-tertiary: var(--bc-text-3);
+  --cometchat-text-color-highlight: var(--bc-text);
+  --cometchat-icon-color-primary: var(--bc-text);
+  --cometchat-icon-color-secondary: var(--bc-text-2);
+  --cometchat-icon-color-highlight: var(--bc-text);
+  --cometchat-radius-3: 6px;
+  --cometchat-message-header-padding: 0 16px;
+  --cometchat-message-header-max-height: 44px;
+}
+
+/* ---------- Header: BlameChat / repo, tagline, pytest pill ---------- */
+.cometchat .cometchat-message-header {
+  height: 44px;
+  min-height: 44px;
+  background: var(--bc-ink);
+}
+.bc-mark rect { fill: var(--hue); }
+.bc-mark { display: block; flex: none; }
+.bc-title {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font: 600 15px/1.2 var(--bc-mono);
+  color: var(--bc-text);
+  white-space: nowrap;
+}
+.bc-title__sep, .bc-title__repo { color: var(--bc-text-2); font-weight: 400; }
+.cometchat .cometchat-message-header__subtitle-wrapper:empty,
+.cometchat .cometchat-message-header__subtitle:empty { display: none; }
+.bc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bc-line);
+  font: 500 13px/1 var(--bc-mono);
+  color: var(--bc-text-2);
+  white-space: nowrap;
+  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bc-pill svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bc-pill__tool { color: var(--bc-text-2); font-weight: 400; }
+.bc-pill[data-state="failing"] .bc-pill__tool,
+.bc-pill[data-state="passing"] .bc-pill__tool { color: inherit; opacity: 0.85; }
+.bc-pill[data-state="failing"] {
+  color: var(--bc-red);
+  border-color: color-mix(in srgb, var(--bc-red) 45%, transparent);
+  background: color-mix(in srgb, var(--bc-red) 10%, transparent);
+}
+.bc-pill[data-state="passing"] {
+  color: var(--bc-green);
+  border-color: color-mix(in srgb, var(--bc-green) 45%, transparent);
+  background: color-mix(in srgb, var(--bc-green) 10%, transparent);
+}
+
+/* ---------- Message list ---------- */
+.cometchat .cometchat-message-list__messages { padding-block: 12px; }
+.cometchat .cometchat-message-bubble__wrapper:has([data-hue="0"]) { --hue: var(--bc-hue-0); }
+.cometchat .cometchat-message-bubble__wrapper:has([data-hue="1"]) { --hue: var(--bc-hue-1); }
+.cometchat .cometchat-message-bubble__wrapper:has([data-hue="2"]) { --hue: var(--bc-hue-2); }
+.cometchat .cometchat-message-bubble__wrapper:has([data-hue="3"]) { --hue: var(--bc-hue-3); }
+.cometchat .cometchat-message-bubble__wrapper:has([data-hue="4"]) { --hue: var(--bc-hue-4); }
+
+/* File badge replaces the robot avatar. */
+.bc-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: 20px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--hue) 16%, var(--bc-panel));
+  border: 1px solid color-mix(in srgb, var(--hue) 55%, transparent);
+  color: var(--hue);
+}
+.bc-badge__mono { font: 700 12.5px/1 var(--bc-mono); letter-spacing: -0.02em; }
+.bc-badge__ext {
+  position: absolute;
+  right: -5px;
+  bottom: -6px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--bc-ink);
+  border: 1px solid var(--bc-line);
+  font: 500 10px/1 var(--bc-mono);
+  color: var(--bc-text-2);
+}
+.bc-sender {
+  display: block;
+  padding: 0 0 4px 2px;
+  font: 600 13px/1.2 var(--bc-mono);
+  color: var(--hue);
+}
+
+/* Incoming: flat panel with the speaker's blame gutter on the left (the pinned brief's signature). */
+.cometchat .cometchat-message-bubble-incoming .cometchat-message-bubble__body.cometchat-message-bubble__text-message {
+  background: var(--bc-panel);
+  box-shadow: inset 3px 0 0 var(--hue, var(--bc-line));
+  padding: 2px 4px 2px 8px;
+}
+/* Outgoing (atul): quiet outline, no fill. */
+.cometchat .cometchat-message-bubble-outgoing .cometchat-message-bubble__body.cometchat-message-bubble__text-message {
+  background: transparent;
+  border: 1px solid var(--bc-line);
+  padding: 2px 4px;
+}
+.cometchat .cometchat-text-bubble--outgoing { color: var(--bc-text); }
+
+/* Inline code from the markdown formatter: file names, fragments, hashes. */
+.cometchat .cometchat-text-bubble__text code {
+  font: 500 13.5px/1.4 var(--bc-mono);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.cometchat .cometchat-text-bubble--incoming .cometchat-text-bubble__text code,
+.cometchat .cometchat-text-bubble--outgoing .cometchat-text-bubble__text code {
+  color: var(--bc-text);
+  background: var(--bc-code-bg);
+  border: 1px solid var(--bc-line);
+}
+.cometchat .cometchat-text-bubble__text .cometchat-mentions,
+.cometchat .cometchat-text-bubble__text .cometchat-mentions-you {
+  font: 500 13.5px/1.4 var(--bc-mono);
+  color: var(--bc-text);
+  background: var(--bc-raised);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/* ---------- The confession: same bubble, plus a receipt for the facts ---------- */
+.cometchat .cometchat-message-bubble-incoming .cometchat-message-bubble__body.cometchat-message-bubble__text-message:has(.bc-confession) {
+  background: color-mix(in srgb, var(--bc-red) 6%, var(--bc-panel));
+  /* Ring floats 2px outside the bubble so the speaker's gutter stays a separate stripe. */
+  outline: 1px solid var(--bc-red);
+  outline-offset: 2px;
+}
+.bc-receipt {
+  margin: 4px 8px 8px 8px;
+  border: 1px solid var(--bc-line);
+  border-radius: 6px;
+  background: var(--bc-code-bg);
+  overflow: hidden;
+  animation: bc-receipt-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.bc-receipt__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--bc-line);
+  font: 500 12.5px/1.3 var(--bc-mono);
+  color: var(--bc-text-2);
+}
+.bc-receipt__loc { color: var(--hue); }
+.bc-receipt__diff {
+  display: grid;
+  grid-template-columns: auto 2ch 1fr;
+  align-items: baseline;
+  font: 500 15px/1.4 var(--bc-mono);
+  color: var(--bc-red);
+  background: color-mix(in srgb, var(--bc-red) 12%, transparent);
+}
+.bc-receipt__lineno {
+  padding: 8px 10px;
+  border-right: 1px solid color-mix(in srgb, var(--bc-red) 30%, var(--bc-line));
+  font-size: 13px;
+  color: var(--bc-text-2);
+  text-align: right;
+}
+.bc-receipt__sign { padding: 8px 0 8px 8px; color: var(--bc-red); }
+.bc-receipt__code { padding: 8px 10px 8px 4px; font: inherit; white-space: normal; }
+.bc-receipt__code > span { white-space: pre; }
+.bc-receipt__source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 10px;
+  border-top: 1px solid var(--bc-line);
+  font: 400 12px/1.3 var(--bc-sans);
+  color: var(--bc-text-3);
+}
+.bc-chip {
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--bc-line);
+  background: var(--bc-panel);
+  font: 500 11.5px/1.3 var(--bc-mono);
+  color: var(--bc-text);
+}
+@keyframes bc-receipt-in {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bc-receipt { animation: none; }
+  .bc-pill { transition: none; }
+}
+
+/* ---------- Composer: input + send only ---------- */
+.cometchat .cometchat-message-composer {
+  border-radius: 0;
+  border-top: 1px solid var(--bc-line);
+  background: var(--bc-ink);
+}
+.cometchat .cometchat-message-composer__input-area { font: 400 15px/1.5 var(--bc-sans); }
+
+/* ---------- Browser surfaces ---------- */
+::selection { background: color-mix(in srgb, var(--bc-hue-0) 35%, transparent); color: var(--bc-text); }
+.cometchat :focus-visible { outline: 2px solid var(--bc-hue-0); outline-offset: 2px; }
+.cometchat [contenteditable], .cometchat textarea { caret-color: var(--bc-green); }
+* { scrollbar-color: var(--bc-line) transparent; scrollbar-width: thin; }
+
+/* Placeholder while the socket connects (see useListReady.ts). */
+.bc-list-pending {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  background: var(--bc-ink);
+  font: 400 13px/1.4 var(--bc-mono);
+  color: var(--bc-text-3);
+}
+
+/* Narrow screens: one-line header, compact pill. The recording width (~850px) is unaffected. */
+@media (max-width: 520px) {
+  .bc-title { font-size: 14px; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .bc-pill { padding: 0 8px; gap: 4px; }
+  .bc-pill__tool { display: none; }
+  .bc-receipt__diff { font-size: 13px; }
+  .bc-chip { font-size: 11px; padding: 1px 5px; }
+  .bc-receipt__source { gap: 4px; }
+}
+
+/* Per-message time: quiet, same HH:MM:SS clock as the brain log. */
+.bc-time {
+  display: block;
+  padding: 0 6px 3px;
+  text-align: right;
+  font: 400 11px/1.2 var(--bc-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-text-3);
+}
+.bc-receipt__test {
+  flex-basis: 100%;
+  font: 400 11.5px/1.3 var(--bc-mono);
+  color: var(--bc-text-2);
+  overflow-wrap: anywhere;
+}

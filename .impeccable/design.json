@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T10:55:28+00:00",
+  "title": "Design System: BlameChat",
+  "extensions": {
+    "colorMeta": {
+      "editor-ink": {
+        "role": "neutral",
+        "displayName": "Editor Ink",
+        "canonical": "oklch(19.9% 0.014 258.4)",
+        "tonalRamp": [
+          "oklch(15% 0.014 258.4)",
+          "oklch(27% 0.014 258.4)",
+          "oklch(39% 0.014 258.4)",
+          "oklch(51% 0.014 258.4)",
+          "oklch(63% 0.014 258.4)",
+          "oklch(75% 0.014 258.4)",
+          "oklch(85% 0.014 258.4)",
+          "oklch(95% 0.006 258.4)"
+        ]
+      },
+      "panel-slate": {
+        "role": "neutral",
+        "displayName": "Panel Slate",
+        "canonical": "oklch(24.2% 0.019 258.4)",
+        "tonalRamp": [
+          "oklch(15% 0.019 258.4)",
+          "oklch(27% 0.019 258.4)",
+          "oklch(39% 0.019 258.4)",
+          "oklch(51% 0.019 258.4)",
+          "oklch(63% 0.019 258.4)",
+          "oklch(75% 0.019 258.4)",
+          "oklch(85% 0.019 258.4)",
+          "oklch(95% 0.008 258.4)"
+        ]
+      },
+      "raised-slate": {
+        "role": "neutral",
+        "displayName": "Raised Slate",
+        "canonical": "oklch(27.5% 0.024 261.1)",
+        "tonalRamp": [
+          "oklch(15% 0.024 261.1)",
+          "oklch(27% 0.024 261.1)",
+          "oklch(39% 0.024 261.1)",
+          "oklch(51% 0.024 261.1)",
+          "oklch(63% 0.024 261.1)",
+          "oklch(75% 0.024 261.1)",
+          "oklch(85% 0.024 261.1)",
+          "oklch(95% 0.01 261.1)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(31.4% 0.023 256.4)",
+        "tonalRamp": [
+          "oklch(15% 0.023 256.4)",
+          "oklch(27% 0.023 256.4)",
+          "oklch(39% 0.023 256.4)",
+          "oklch(51% 0.023 256.4)",
+          "oklch(63% 0.023 256.4)",
+          "oklch(75% 0.023 256.4)",
+          "oklch(85% 0.023 256.4)",
+          "oklch(95% 0.009 256.4)"
+        ]
+      },
+      "code-well": {
+        "role": "neutral",
+        "displayName": "Code Well",
+        "canonical": "oklch(17.6% 0.014 258.4)",
+        "tonalRamp": [
+          "oklch(15% 0.014 258.4)",
+          "oklch(27% 0.014 258.4)",
+          "oklch(39% 0.014 258.4)",
+          "oklch(51% 0.014 258.4)",
+          "oklch(63% 0.014 258.4)",
+          "oklch(75% 0.014 258.4)",
+          "oklch(85% 0.014 258.4)",
+          "oklch(95% 0.006 258.4)"
+        ]
+      },
+      "text-primary": {
+        "role": "primary",
+        "displayName": "Text Primary",
+        "canonical": "oklch(89.7% 0.016 253.9)",
+        "tonalRamp": [
+          "oklch(15% 0.016 253.9)",
+          "oklch(27% 0.016 253.9)",
+          "oklch(39% 0.016 253.9)",
+          "oklch(51% 0.016 253.9)",
+          "oklch(63% 0.016 253.9)",
+          "oklch(75% 0.016 253.9)",
+          "oklch(85% 0.016 253.9)",
+          "oklch(95% 0.006 253.9)"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary",
+        "canonical": "oklch(72.1% 0.026 254.0)",
+        "tonalRamp": [
+          "oklch(15% 0.026 254.0)",
+          "oklch(27% 0.026 254.0)",
+          "oklch(39% 0.026 254.0)",
+          "oklch(51% 0.026 254.0)",
+          "oklch(63% 0.026 254.0)",
+          "oklch(75% 0.026 254.0)",
+          "oklch(85% 0.026 254.0)",
+          "oklch(95% 0.01 254.0)"
+        ]
+      },
+      "text-tertiary": {
+        "role": "neutral",
+        "displayName": "Text Tertiary",
+        "canonical": "oklch(62.4% 0.029 259.0)",
+        "tonalRamp": [
+          "oklch(15% 0.029 259.0)",
+          "oklch(27% 0.029 259.0)",
+          "oklch(39% 0.029 259.0)",
+          "oklch(51% 0.029 259.0)",
+          "oklch(63% 0.029 259.0)",
+          "oklch(75% 0.029 259.0)",
+          "oklch(85% 0.029 259.0)",
+          "oklch(95% 0.012 259.0)"
+        ]
+      },
+      "diff-red": {
+        "role": "tertiary",
+        "displayName": "Diff Red",
+        "canonical": "oklch(69.8% 0.158 24.7)",
+        "tonalRamp": [
+          "oklch(15% 0.158 24.7)",
+          "oklch(27% 0.158 24.7)",
+          "oklch(39% 0.158 24.7)",
+          "oklch(51% 0.158 24.7)",
+          "oklch(63% 0.158 24.7)",
+          "oklch(75% 0.158 24.7)",
+          "oklch(85% 0.158 24.7)",
+          "oklch(95% 0.063 24.7)"
+        ]
+      },
+      "diff-green": {
+        "role": "tertiary",
+        "displayName": "Diff Green",
+        "canonical": "oklch(77.5% 0.147 154.7)",
+        "tonalRamp": [
+          "oklch(15% 0.147 154.7)",
+          "oklch(27% 0.147 154.7)",
+          "oklch(39% 0.147 154.7)",
+          "oklch(51% 0.147 154.7)",
+          "oklch(63% 0.147 154.7)",
+          "oklch(75% 0.147 154.7)",
+          "oklch(85% 0.147 154.7)",
+          "oklch(95% 0.059 154.7)"
+        ]
+      },
+      "hue-auth-blue": {
+        "role": "secondary",
+        "displayName": "Auth Blue",
+        "canonical": "oklch(71.9% 0.132 264.2)",
+        "tonalRamp": [
+          "oklch(15% 0.132 264.2)",
+          "oklch(27% 0.132 264.2)",
+          "oklch(39% 0.132 264.2)",
+          "oklch(51% 0.132 264.2)",
+          "oklch(63% 0.132 264.2)",
+          "oklch(75% 0.132 264.2)",
+          "oklch(85% 0.132 264.2)",
+          "oklch(95% 0.053 264.2)"
+        ]
+      },
+      "hue-db-amber": {
+        "role": "secondary",
+        "displayName": "DB Amber",
+        "canonical": "oklch(78.4% 0.106 75.4)",
+        "tonalRamp": [
+          "oklch(15% 0.106 75.4)",
+          "oklch(27% 0.106 75.4)",
+          "oklch(39% 0.106 75.4)",
+          "oklch(51% 0.106 75.4)",
+          "oklch(63% 0.106 75.4)",
+          "oklch(75% 0.106 75.4)",
+          "oklch(85% 0.106 75.4)",
+          "oklch(95% 0.042 75.4)"
+        ]
+      },
+      "hue-utils-rose": {
+        "role": "secondary",
+        "displayName": "Utils Rose",
+        "canonical": "oklch(72.3% 0.159 10.3)",
+        "tonalRamp": [
+          "oklch(15% 0.159 10.3)",
+          "oklch(27% 0.159 10.3)",
+          "oklch(39% 0.159 10.3)",
+          "oklch(51% 0.159 10.3)",
+          "oklch(63% 0.159 10.3)",
+          "oklch(75% 0.159 10.3)",
+          "oklch(85% 0.159 10.3)",
+          "oklch(95% 0.064 10.3)"
+        ]
+      },
+      "hue-cart-lime": {
+        "role": "secondary",
+        "displayName": "Cart Lime",
+        "canonical": "oklch(79.5% 0.139 130.1)",
+        "tonalRamp": [
+          "oklch(15% 0.139 130.1)",
+          "oklch(27% 0.139 130.1)",
+          "oklch(39% 0.139 130.1)",
+          "oklch(51% 0.139 130.1)",
+          "oklch(63% 0.139 130.1)",
+          "oklch(75% 0.139 130.1)",
+          "oklch(85% 0.139 130.1)",
+          "oklch(95% 0.056 130.1)"
+        ]
+      },
+      "hue-api-violet": {
+        "role": "secondary",
+        "displayName": "API Violet",
+        "canonical": "oklch(75.1% 0.134 299.5)",
+        "tonalRamp": [
+          "oklch(15% 0.134 299.5)",
+          "oklch(27% 0.134 299.5)",
+          "oklch(39% 0.134 299.5)",
+          "oklch(51% 0.134 299.5)",
+          "oklch(63% 0.134 299.5)",
+          "oklch(75% 0.134 299.5)",
+          "oklch(85% 0.134 299.5)",
+          "oklch(95% 0.054 299.5)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Header product and repo name."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Message text and composer input."
+      },
+      "sender": {
+        "displayName": "Sender",
+        "purpose": "File name above incoming bubbles, in the file hue."
+      },
+      "code-inline": {
+        "displayName": "Code Inline",
+        "purpose": "Backticked spans and mentions inside messages."
+      },
+      "code-receipt": {
+        "displayName": "Code Receipt",
+        "purpose": "Culprit fragment in the confession receipt."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Test pill label."
+      },
+      "chip": {
+        "displayName": "Chip",
+        "purpose": "Evidence chips naming the tool."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Receipt source line."
+      }
+    },
+    "shadows": [
+      {
+        "name": "blame-gutter",
+        "value": "inset 3px 0 0 var(--hue, var(--bc-line))",
+        "purpose": "The Blame Gutter: 3px stripe in the speaker's file hue on the inside left edge of every incoming bubble. Identity mark, not elevation."
+      },
+      {
+        "name": "confession-ring",
+        "value": "outline: 1px solid var(--bc-red); outline-offset: 2px",
+        "purpose": "Ring outside the confession bubble, offset so the gutter stays a separate stripe."
+      },
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid var(--bc-hue-0); outline-offset: 2px",
+        "purpose": "Keyboard focus on every focusable element inside the kit."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Single easing curve for all state motion."
+      },
+      {
+        "name": "pill-state",
+        "value": "color, border-color, background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Test pill moving between unknown, failing and passing. Disabled under prefers-reduced-motion."
+      },
+      {
+        "name": "receipt-reveal",
+        "value": "bc-receipt-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both (opacity 0 to 1, clip-path inset(0 0 100% 0) to inset(0))",
+        "purpose": "Top-to-bottom reveal of the confession receipt. Disabled under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "520px",
+        "note": "max-width: one-line ellipsized header, pill drops tool label, receipt and chips step down."
+      },
+      {
+        "name": "recording",
+        "value": "850px",
+        "note": "Primary design viewport (recording width); reference size, no media query."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Header Bar",
+      "kind": "nav",
+      "refersTo": "header-bar",
+      "description": "44px kit message header: gutter mark, BlameChat / repo in mono, test pill on the right.",
+      "html": "<header class=\"ds-header\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" width=\"20\" height=\"20\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"10\" height=\"2.2\" rx=\"1.1\" fill=\"#7aa2f7\"/><rect x=\"2\" y=\"5.4\" width=\"13\" height=\"2.2\" rx=\"1.1\" fill=\"#e0af68\"/><rect x=\"2\" y=\"8.8\" width=\"16\" height=\"2.2\" rx=\"1.1\" fill=\"#f7768e\"/><rect x=\"2\" y=\"12.2\" width=\"14\" height=\"2.2\" rx=\"1.1\" fill=\"#9ece6a\"/><rect x=\"2\" y=\"15.6\" width=\"12\" height=\"2.2\" rx=\"1.1\" fill=\"#bb9af7\"/></svg><h1 class=\"ds-title\">BlameChat <span class=\"ds-title-dim\">/</span> <span class=\"ds-title-dim\">tinyshop</span></h1></header>",
+      "css": ".ds-header { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px; background: #12161c; border-bottom: 1px solid #2a323d; } .ds-title { margin: 0; font: 600 15px/1.2 \"JetBrains Mono\", ui-monospace, monospace; color: #d6dee8; white-space: nowrap; } .ds-title-dim { color: #9aa6b5; font-weight: 400; }"
+    },
+    {
+      "name": "Test Pill (failing)",
+      "kind": "chip",
+      "refersTo": "test-pill-failing",
+      "description": "Status readout mirroring the brain's pytest lines; red when failing.",
+      "html": "<span class=\"ds-pill\" role=\"status\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M4.5 4.5l7 7M11.5 4.5l-7 7\"/></svg><span class=\"ds-pill-tool\">pytest</span>tests failing</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; font: 500 13px/1 \"JetBrains Mono\", ui-monospace, monospace; color: #f0716b; border: 1px solid color-mix(in srgb, #f0716b 45%, transparent); background: color-mix(in srgb, #f0716b 10%, #12161c); transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1); } .ds-pill svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; } .ds-pill-tool { font-weight: 400; opacity: 0.85; } @media (prefers-reduced-motion: reduce) { .ds-pill { transition: none; } }"
+    },
+    {
+      "name": "Test Pill (passing)",
+      "kind": "chip",
+      "refersTo": "test-pill-passing",
+      "description": "Same pill after the fix commit; green when pytest passes.",
+      "html": "<span class=\"ds-pill2\" role=\"status\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M3.5 8.5l3 3 6-7\"/></svg><span class=\"ds-pill2-tool\">pytest</span>tests passing</span>",
+      "css": ".ds-pill2 { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; font: 500 13px/1 \"JetBrains Mono\", ui-monospace, monospace; color: #5bd18b; border: 1px solid color-mix(in srgb, #5bd18b 45%, transparent); background: color-mix(in srgb, #5bd18b 10%, #12161c); } .ds-pill2 svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; } .ds-pill2-tool { font-weight: 400; opacity: 0.85; }"
+    },
+    {
+      "name": "File Badge",
+      "kind": "custom",
+      "refersTo": "file-badge",
+      "description": "Replaces the kit avatar: 30px rounded-square monogram in the file hue with a .py tag.",
+      "html": "<span class=\"ds-badge\" aria-hidden=\"true\"><span class=\"ds-badge-mono\">ut</span><span class=\"ds-badge-ext\">.py</span></span>",
+      "css": ".ds-badge { --hue: #f7768e; position: relative; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: color-mix(in srgb, var(--hue) 16%, #1a2029); border: 1px solid color-mix(in srgb, var(--hue) 55%, transparent); color: var(--hue); } .ds-badge-mono { font: 700 12.5px/1 \"JetBrains Mono\", ui-monospace, monospace; letter-spacing: -0.02em; } .ds-badge-ext { position: absolute; right: -5px; bottom: -6px; padding: 1px 3px; border-radius: 3px; background: #12161c; border: 1px solid #2a323d; font: 500 10px/1 \"JetBrains Mono\", ui-monospace, monospace; color: #9aa6b5; }"
+    },
+    {
+      "name": "Incoming Bubble (Blame Gutter)",
+      "kind": "card",
+      "refersTo": "bubble-incoming",
+      "description": "A file's message: mono sender in its hue, flat panel bubble with the 3px inset gutter stripe.",
+      "html": "<div class=\"ds-in\"><span class=\"ds-sender\">auth.py</span><div class=\"ds-bubble\">i only call <code class=\"ds-code\">@utils.py</code>, my commit is newer</div></div>",
+      "css": ".ds-in { --hue: #7aa2f7; background: #12161c; padding: 8px; } .ds-sender { display: block; padding: 0 0 4px 2px; font: 600 13px/1.2 \"JetBrains Mono\", ui-monospace, monospace; color: var(--hue); } .ds-bubble { display: inline-block; background: #1a2029; box-shadow: inset 3px 0 0 var(--hue); border-radius: 6px; padding: 8px 12px 8px 16px; font: 400 15px/1.5 \"IBM Plex Sans\", system-ui, sans-serif; color: #d6dee8; } .ds-code { font: 500 13.5px/1.4 \"JetBrains Mono\", ui-monospace, monospace; padding: 1px 5px; border-radius: 4px; background: #0d1117; border: 1px solid #2a323d; color: #d6dee8; }"
+    },
+    {
+      "name": "Outgoing Bubble",
+      "kind": "card",
+      "refersTo": "bubble-outgoing",
+      "description": "The human's message: no fill, hairline outline, right-aligned.",
+      "html": "<div class=\"ds-out-row\"><div class=\"ds-out\">who broke login?</div></div>",
+      "css": ".ds-out-row { display: flex; justify-content: flex-end; background: #12161c; padding: 8px; } .ds-out { background: transparent; border: 1px solid #2a323d; border-radius: 6px; padding: 8px 12px; font: 400 15px/1.5 \"IBM Plex Sans\", system-ui, sans-serif; color: #d6dee8; }"
+    },
+    {
+      "name": "Confession Receipt",
+      "kind": "custom",
+      "refersTo": "receipt",
+      "description": "The culprit's bubble changes register: red-tinted, offset red ring, and a diff-hunk receipt of the parsed facts.",
+      "html": "<div class=\"ds-conf\"><div class=\"ds-conf-bubble\"><p class=\"ds-conf-text\">ok. <code class=\"ds-c\">utils.py</code> L6 <code class=\"ds-c\">.strip().lower()</code>, commit <code class=\"ds-c\">4278cfe</code>. that was me</p><figure class=\"ds-receipt\"><figcaption class=\"ds-receipt-head\"><span class=\"ds-receipt-loc\">utils.py:6</span><span>4278cfe</span></figcaption><div class=\"ds-receipt-diff\"><span class=\"ds-receipt-no\">6</span><span class=\"ds-receipt-sign\">−</span><code class=\"ds-receipt-code\">.strip().lower()</code></div><p class=\"ds-receipt-src\">computed by <span class=\"ds-chip\">pytest</span> <span class=\"ds-chip\">git</span></p></figure></div></div>",
+      "css": ".ds-conf { --hue: #f7768e; background: #12161c; padding: 12px; } .ds-conf-bubble { background: color-mix(in srgb, #f0716b 6%, #1a2029); box-shadow: inset 3px 0 0 var(--hue); outline: 1px solid #f0716b; outline-offset: 2px; border-radius: 6px; padding: 4px 4px 4px 8px; } .ds-conf-text { margin: 6px 8px; font: 400 15px/1.5 \"IBM Plex Sans\", system-ui, sans-serif; color: #d6dee8; } .ds-c { font: 500 13.5px/1.4 \"JetBrains Mono\", ui-monospace, monospace; padding: 1px 5px; border-radius: 4px; background: #0d1117; border: 1px solid #2a323d; } .ds-receipt { margin: 4px 8px 8px; border: 1px solid #2a323d; border-radius: 6px; background: #0d1117; overflow: hidden; animation: ds-receipt-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; } .ds-receipt-head { display: flex; justify-content: space-between; gap: 16px; padding: 6px 10px; border-bottom: 1px solid #2a323d; font: 500 12.5px/1.3 \"JetBrains Mono\", ui-monospace, monospace; color: #9aa6b5; } .ds-receipt-loc { color: var(--hue); } .ds-receipt-diff { display: grid; grid-template-columns: auto 2ch 1fr; align-items: baseline; font: 500 15px/1.4 \"JetBrains Mono\", ui-monospace, monospace; color: #f0716b; background: color-mix(in srgb, #f0716b 12%, transparent); } .ds-receipt-no { padding: 8px 10px; border-right: 1px solid color-mix(in srgb, #f0716b 30%, #2a323d); font-size: 13px; color: #9aa6b5; text-align: right; } .ds-receipt-sign { padding: 8px 0 8px 8px; } .ds-receipt-code { padding: 8px 10px 8px 4px; font: inherit; } .ds-receipt-src { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; padding: 6px 10px; border-top: 1px solid #2a323d; font: 400 12px/1.3 \"IBM Plex Sans\", system-ui, sans-serif; color: #7d8899; } .ds-chip { padding: 2px 7px; border-radius: 4px; border: 1px solid #2a323d; background: #1a2029; font: 500 11.5px/1.3 \"JetBrains Mono\", ui-monospace, monospace; color: #d6dee8; } @keyframes ds-receipt-in { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } } @media (prefers-reduced-motion: reduce) { .ds-receipt { animation: none; } }"
+    },
+    {
+      "name": "Evidence Chip",
+      "kind": "chip",
+      "refersTo": "evidence-chip",
+      "description": "Static tag naming the tool a fact came from.",
+      "html": "<p class=\"ds-src\">computed by <span class=\"ds-ev\">pytest</span> <span class=\"ds-ev\">git</span></p>",
+      "css": ".ds-src { display: flex; align-items: center; gap: 6px; margin: 0; padding: 6px 10px; background: #0d1117; font: 400 12px/1.3 \"IBM Plex Sans\", system-ui, sans-serif; color: #7d8899; } .ds-ev { padding: 2px 7px; border-radius: 4px; border: 1px solid #2a323d; background: #1a2029; font: 500 11.5px/1.3 \"JetBrains Mono\", ui-monospace, monospace; color: #d6dee8; }"
+    },
+    {
+      "name": "Composer",
+      "kind": "input",
+      "refersTo": "composer",
+      "description": "Kit composer reduced to input and send: square, hairline top border, green caret.",
+      "html": "<div class=\"ds-composer\"><input class=\"ds-composer-input\" placeholder=\"Ask the files… e.g. who broke login?\" aria-label=\"Message\"><button class=\"ds-send\" aria-label=\"Send\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path d=\"M3 20l18-8L3 4v6l12 2-12 2z\" fill=\"currentColor\"/></svg></button></div>",
+      "css": ".ds-composer { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #12161c; border-top: 1px solid #2a323d; } .ds-composer-input { flex: 1; background: transparent; border: 0; font: 400 15px/1.5 \"IBM Plex Sans\", system-ui, sans-serif; color: #d6dee8; caret-color: #5bd18b; } .ds-composer-input::placeholder { color: #7d8899; } .ds-composer-input:focus-visible, .ds-send:focus-visible { outline: 2px solid #7aa2f7; outline-offset: 2px; } .ds-send { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 0; background: #2a323d; color: #d6dee8; cursor: pointer; } .ds-send:hover { background: #212834; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Blame Gutter",
+    "overview": "The chat is a git blame view that talks back. Every file in the repo is a group member, and each one speaks from its own colored gutter, the way an editor's blame column tints the lines a commit owns. The surface is dark editor ink, flat and quiet, so the only saturated color on screen is identity (which file is talking) or test state (red failing, green passing). Banter is set in a humanist sans; anything that is a fact (file name, line, code fragment, commit hash, tool name) is set in mono and framed like code.\n\nThe system is a skin, not a rebuild. It is the real CometChat React UI Kit v7.2.3, themed only through the kit's own extension points: its `--cometchat-*` CSS tokens (mapped from the `--bc-*` tokens on `:root`), its BEM classes, the message header's view slots (leading, title, subtitle, trailing), and a text plugin that swaps the leading view, header view, bubble wrapper and status view. Future surfaces extend the kit the same way; they never re-implement a header, list, bubble or composer by hand.\n\nDensity is tuned for a ~850 CSS px recording viewport watched as compressed video: a slim 44px header, 15px body text, short bubbles that hug their content, and generous vertical rhythm between speakers so the argument can be followed at a glance. The visual rejection is confirmed by the direction: not the stock CometChat sample look (purple bubbles, robot avatars, Roboto on grey).",
+    "keyCharacteristics": [
+      "Dark editor ink with tonal layering (ink, panel, raised, code well); no drop shadows.",
+      "One hue per file, carried by the gutter stripe, the badge and the sender name, never by the bubble fill.",
+      "Diff red and green are reserved for test state and the confession.",
+      "Mono for facts and names, sans for banter.",
+      "Facts appear as code, sourced from git and pytest, never as decorated prose.",
+      "Real CometChat UI Kit components, themed through tokens, slots and plugins only."
+    ],
+    "rules": [
+      {
+        "name": "The One Hue Per File Rule",
+        "body": "A file's hue appears only on that file's gutter stripe, badge, sender name and receipt location. It is never a bubble fill and never shared across files.",
+        "section": "colors"
+      },
+      {
+        "name": "The Diff-Only Red/Green Rule",
+        "body": "Red and green mean test state and the culprit line, nothing else. No red for generic errors in chat, no green for generic success.",
+        "section": "colors"
+      },
+      {
+        "name": "The Neutral Primary Rule",
+        "body": "The kit's primary color is mapped to the body text color, so stock kit accents never introduce a sixth hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Facts Are Mono Rule",
+        "body": "File names, line numbers, code, hashes and tool names are always mono. Persona banter is always sans. A sentence may mix both, but a fact never appears in sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Ink Rule",
+        "body": "No drop shadows, glows or blur anywhere. If something needs to stand out, it changes tone, gains a hairline, or takes a diff color.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do theme through the kit: set `--cometchat-*` tokens from `--bc-*`, target kit BEM classes, fill header view slots, and extend the text plugin.",
+      "Do mark every incoming file bubble with the 3px inset Blame Gutter stripe in that file's hue.",
+      "Do set file names, lines, code, hashes and tool names in JetBrains Mono.",
+      "Do reserve Diff Red and Diff Green for test state, the culprit line and the confession.",
+      "Do show only facts that git or pytest produced, and show where they came from with evidence chips.",
+      "Do build depth from tone and hairlines (Code Well, Editor Ink, Panel Slate, Raised Slate, Hairline).",
+      "Do disable the receipt reveal and pill transition under `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't rebuild the header, message list, bubbles or composer by hand, or swap in non-kit chat components.",
+      "Don't fill a bubble with a file hue, or let one file's hue appear on another file's message.",
+      "Don't use red or green for anything other than test state and the culprit line.",
+      "Don't use drop shadows, glows or blur; the only shadow is the inset gutter stripe.",
+      "Don't let the UI invent or infer a fact (line, fragment, commit, test result) the brain did not send.",
+      "Don't fall back to the stock CometChat sample look: purple bubbles, robot avatars, Roboto on grey.",
+      "Don't fold the confession behind \"Read more\"; it carries the commit."
+    ]
+  }
+}
