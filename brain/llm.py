@@ -34,7 +34,8 @@ SYSTEM = """You write a short group chat where source files of a repo argue abou
 Reply with JSON only: {"messages":[{"speaker":"<file>.py","text":"..."}]}
 
 Hard rules:
-- 3 to 5 messages. Each under 160 characters. Casual group-chat tone, at most 1 emoji per message.
+- 3 to 5 messages. Each under 160 characters, most much shorter. lowercase, casual group-chat tone,
+  at most 1 emoji per message. Stay in each file's voice.
 - Speakers must be files from the member list. Never invent other files.
 - Facts are fixed. Never change the culprit, line, code or commit.
 - Only the CULPRIT may write a line number (like L6), code, backticks or a commit hash. It speaks LAST and
@@ -54,10 +55,8 @@ def roles(facts):
     for m in FILES:
         f, claims = m["file"], []
         if f == culprit:
-            claims.append(f'CULPRIT. speaks last. must include "L{facts["line"]}", "{facts["code_fragment"]}" '
-                          f'and "{facts["commit"]}" ("{facts["summary"]}") and admit it'
-                          if facts.get("line") else
-                          f'CULPRIT. speaks last. must include commit "{facts["commit"]}" ("{facts["summary"]}")')
+            claims.append(f"CULPRIT. speaks last. its message must END with exactly: {confession(facts)} "
+                          "(a few words in its voice may come before that)")
         else:
             if f in facts.get("suspects", []) and culprit in imports.get(f, []):
                 claims.append(f"may say it only calls @{culprit}")
@@ -69,8 +68,24 @@ def roles(facts):
             if not claims:
                 claims.append("bystander: may only tease, no factual claims "
                               "(do NOT use the words commit/changed/edited/newer/pushed)")
-        out[f] = {"persona": m["persona"], "role": "; ".join(claims)}
+        out[f] = {"voice": VOICES.get(f, m["persona"]), "role": "; ".join(claims)}
     return out
+
+
+VOICES = {
+    "auth.py": "paranoid gatekeeper. suspicious of everyone, security-obsessed, defensive",
+    "db.py": "tired senior dev. weary, dry, has seen it all, wants to go to sleep",
+    "utils.py": "anxious people-pleaser. eager, apologetic, breaks things while trying to help",
+    "cart.py": "sarcastic bystander. eye-rolling, deadpan",
+    "api.py": "sleepy bystander. half-awake, yawning, very few words",
+}
+
+
+def confession(facts):
+    if facts.get("line"):
+        return (f"...ok. `{facts['culprit']}` L{facts['line']} `{facts['code_fragment']}`, "
+                f"commit `{facts['commit']}`. that was me 😬")
+    return f"...ok. commit `{facts['commit']}` ('{facts['summary']}'). that was me 😬"
 
 
 def user_prompt(facts, hint=None):
@@ -96,12 +111,12 @@ def _parse(content):
     return msgs
 
 
-def _groq(facts, hint):
+def _groq(system, user):
     model = os.environ.get("GROQ_MODEL") or "llama-3.3-70b-versatile"
     body = {
         "model": model,
-        "messages": [{"role": "system", "content": SYSTEM},
-                     {"role": "user", "content": user_prompt(facts, hint)}],
+        "messages": [{"role": "system", "content": system},
+                     {"role": "user", "content": user}],
         "response_format": {"type": "json_object"},
         "temperature": 0.9,
         "max_completion_tokens": 1500,
@@ -115,11 +130,11 @@ def _groq(facts, hint):
     return _parse(r.json()["choices"][0]["message"]["content"])
 
 
-def _gemini(facts, hint):
+def _gemini(system, user):
     model = os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash"
     body = {
-        "systemInstruction": {"parts": [{"text": SYSTEM}]},
-        "contents": [{"role": "user", "parts": [{"text": user_prompt(facts, hint)}]}],
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9},
     }
     r = httpx.post(GEMINI_URL.format(model=model), json=body, timeout=TIMEOUT,
@@ -135,7 +150,7 @@ def _gemini(facts, hint):
 
 # Canned outputs for the fixture (utils.py L6 .strip().lower() 4278cfe). No network.
 CONFESS = {"speaker": "utils.py",
-           "text": "...ok fine. L6 `.strip().lower()` in 4278cfe was me. I was just trying to help 😬"}
+           "text": "i was only trying to help... ...ok. `utils.py` L6 `.strip().lower()`, commit `4278cfe`. that was me 😬"}
 MOCKS = {
     "good": [
         {"speaker": "auth.py", "text": "don't look at me. I only call @utils.py and I check everything twice 🙄"},
@@ -181,15 +196,49 @@ def _mock(facts, hint):
     return json.loads(json.dumps(MOCKS[case]))
 
 
-PROVIDERS = {"groq": _groq, "gemini": _gemini, "mock": _mock}
+PROVIDERS = {"groq": _groq, "gemini": _gemini}
+
+
+def _provider(which):
+    which = which or mode()
+    if which != "mock" and which not in PROVIDERS:
+        raise LLMError(f"unknown LLM_MODE {which!r}")
+    return which
 
 
 def banter(facts, hint=None, which=None):
     """One LLM call -> [{"speaker", "text"}]. Raises LLMError / httpx errors."""
-    which = which or mode()
-    if which not in PROVIDERS:
-        raise LLMError(f"unknown LLM_MODE {which!r}")
-    return PROVIDERS[which](facts, hint)
+    which = _provider(which)
+    if which == "mock":
+        return _mock(facts, hint)
+    return PROVIDERS[which](SYSTEM, user_prompt(facts, hint))
+
+
+# ---------- free chat (no facts at all) ----------
+
+SYSTEM_CHAT = """You are the group chat of a tiny repo. Every member is a source file with a personality.
+atul (the human dev) just wrote something. Reply with JSON only: {"messages":[{"speaker":"<file>.py","text":"..."}]}
+
+Hard rules:
+- 1 or 2 messages total, each under 120 characters. lowercase, casual group-chat tone, at most 1 emoji each.
+- Speakers: only member files. Pick the file(s) whose voice best fits what atul said and the conversation so far.
+  If atul addressed or named a file, that file replies first.
+- Personality only, ZERO facts about the code: no line numbers, no hashes, no code, no backticks, no file names
+  except members (written as @name.py), and never use the words commit, changed, edited, newer, pushed, line, lines.
+- If atul asks about bugs or fixes, don't guess: tell him to ask "who broke it?" in your own voice.
+- Don't repeat what was already said in the history."""
+
+
+def chat(history, text, addressed=None, hint=None, which=None):
+    """Free chat: 1-2 persona replies. history = [{"who", "text"}] (last 8)."""
+    which = _provider(which)
+    if which == "mock":
+        return [{"speaker": addressed or "db.py", "text": "mm. hi. what do you need 😴"}]
+    payload = {"members": VOICES, "history": history[-8:], "atul_says": text, "addressed": addressed}
+    user = "Write the replies as JSON. Input:\n" + json.dumps(payload, indent=1, ensure_ascii=False)
+    if hint:
+        user += f"\n\nYour previous answer was rejected: {hint}. Fix that."
+    return PROVIDERS[which](SYSTEM_CHAT, user)
 
 
 def to_lines(messages):

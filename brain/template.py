@@ -1,4 +1,6 @@
 """Template argument: facts -> [(uid, text)]. A line is emitted only if its rule finds a file."""
+import random
+
 from members import FILE_TO_UID, FILES
 
 ORDER = [m["file"] for m in FILES]
@@ -77,3 +79,68 @@ def commit_lines(changed, green, imports, culprit=None):
     elif culprit in FILE_TO_UID:
         lines.append((FILE_TO_UID[culprit], "still red. not done with me yet 😩"))
     return lines
+
+
+# ---------- grounded follow-ups (facts only from ground.py / pytest) ----------
+
+SUPPORT = {
+    "auth.py": "fine. but i'm watching that diff 👀",
+    "db.py": "do it. i'd like to sleep tonight 😴",
+    "utils.py": "you got this!! 😊",
+    "cart.py": "wow, a fix. groundbreaking 💅",
+    "api.py": "wake me when it's green 😪",
+}
+
+
+def fix_lines(facts):
+    """Culprit gives the exact fix; one other file cheers (no facts)."""
+    culprit = facts["culprit"]
+    if facts.get("line"):
+        fix = (f"remove `{facts['code_fragment']}` from `{culprit}` L{facts['line']}, then commit. "
+               "i'll behave 🙏")
+    else:
+        fix = f"revert commit `{facts['commit']}` ('{facts['summary']}'), then commit. i'll behave 🙏"
+    lines = [(FILE_TO_UID[culprit], fix)]
+    helper = next((f for f in ORDER if f in facts.get("suspects", []) and f != culprit), None) \
+        or next(f for f in ORDER if f != culprit)
+    lines.append((FILE_TO_UID[helper], SUPPORT[helper]))
+    return lines
+
+
+def green_line(speaker, text="all green right now ✅"):
+    return [(FILE_TO_UID[speaker], text)]
+
+
+def error_lines(fail, owner):
+    """The file that owns the failing call reads the failure out."""
+    text = f"failing: `{fail['test']}`"
+    if fail.get("source"):
+        text += f" → `{fail['source']}`"
+    if fail.get("message"):
+        text += f" → {fail['message']}"
+    return [(FILE_TO_UID[owner], text + " 😰")]
+
+
+# ---------- chat fallback: persona lines, no facts ----------
+
+CHAT_POOL = {
+    "auth.py": ["who's asking? 👀", "i don't trust that message", "verifying you… ok fine, hi",
+                "everything is suspicious until proven otherwise", "did someone say password? 🔒"],
+    "db.py": ["it's been a long day 😴", "i've seen this before. many times.", "yep. still here. still tired.",
+              "coffee first, questions later ☕", "kids these days"],
+    "utils.py": ["happy to help!! 😊", "anything you need, i got you", "omg hi!! need anything?",
+                 "i can totally do that, probably", "sorry! wait, what did i do? 😅"],
+    "cart.py": ["wow. riveting. 🙄", "sure, let's all chat instead of shipping", "oh good, more messages",
+                "cool cool cool", "can't wait to hear what's next 💅"],
+    "api.py": ["zzz… huh? 😪", "five more minutes", "i'm up. mostly.", "is it morning already",
+               "*yawns* what'd i miss"],
+}
+_last_pick = {}
+
+
+def chat_fallback(speaker=None):
+    """One random persona line; the same file never repeats its previous line."""
+    speaker = speaker or random.choice(ORDER)
+    pool = [t for t in CHAT_POOL[speaker] if t != _last_pick.get(speaker)]
+    _last_pick[speaker] = text = random.choice(pool)
+    return [(FILE_TO_UID[speaker], text)]

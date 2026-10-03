@@ -66,3 +66,37 @@ def validate(messages, facts):
             if f != culprit and f not in imports.get(who, []):
                 return False, f"{tag} mentions {f}, which is neither the culprit nor an import"
     return True, "ok"
+
+
+CHAT_FORBIDDEN = re.compile(r"\b(commit\w*|changed|edited|newer|pushed|lines?)\b", re.I)
+
+
+def validate_chat(messages, first=None):
+    """Strict gate for free chat: personality only, zero facts. -> (ok, reason)"""
+    if not isinstance(messages, list) or not all(
+            isinstance(m, dict) and isinstance(m.get("speaker"), str) and isinstance(m.get("text"), str)
+            for m in messages):
+        return False, "bad shape: need [{speaker, text}]"
+    if not 1 <= len(messages) <= 2:
+        return False, f"need 1-2 messages, got {len(messages)}"
+    if first and messages[0]["speaker"] != first:
+        return False, f"{first} was addressed but {messages[0]['speaker']} replied first"
+    for i, m in enumerate(messages):
+        who, text = m["speaker"], m["text"]
+        tag = f"msg {i + 1} ({who})"
+        if who not in MEMBERS:
+            return False, f"speaker {who!r} is not a member"
+        if not text.strip() or len(text) >= 140:
+            return False, f"{tag} length {len(text)} (need 1-139)"
+        if LINE_REF.search(text):
+            return False, f"{tag} has a line number"
+        if HEX.search(text):
+            return False, f"{tag} has a commit hash"
+        if "`" in text:
+            return False, f"{tag} has backticked code"
+        for f in PY_FILE.findall(text):
+            if f.lstrip("@").split("/")[-1] not in MEMBERS:
+                return False, f"{tag} names non-member file {f}"
+        if m2 := CHAT_FORBIDDEN.search(text):
+            return False, f"{tag} makes a code claim ({m2.group(0)!r})"
+    return True, "ok"

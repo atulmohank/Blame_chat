@@ -3,6 +3,7 @@ import asyncio
 import random
 import re
 import time
+from collections import defaultdict, deque
 from datetime import datetime
 
 from fastapi import FastAPI
@@ -12,9 +13,10 @@ from pydantic import BaseModel
 import llm
 import state
 from cometchat import send_text
-from ground import MEMBER_FILES, find_culprit, git, imports_of_members, parse_diff, run, trace_tests
-from template import build_lines, commit_lines
-from validator import validate
+from ground import MEMBER_FILES, failures, find_culprit, git, imports_of_members, parse_diff, run, trace_tests
+from members import FILE_TO_UID
+from template import build_lines, chat_fallback, commit_lines, error_lines, fix_lines, green_line
+from validator import validate, validate_chat
 
 app = FastAPI(title="BlameChat brain")
 app.add_middleware(
@@ -44,12 +46,23 @@ def session():
 SCRIPT_LOCK = asyncio.Lock()
 
 
+UID_TO_FILE = {uid: f for f, uid in FILE_TO_UID.items()}
+HISTORY = defaultdict(lambda: deque(maxlen=8))   # guid -> last 8 {"who", "text"} (atul + files)
+FACTS = {}                                        # guid -> (HEAD, facts) for grounded follow-ups
+
+
+def remember(guid, who, text):
+    text = re.sub(r"<@uid:(\w+)>", lambda m: "@" + UID_TO_FILE.get(m.group(1), m.group(1)), text)
+    HISTORY[guid].append({"who": who, "text": text})
+
+
 async def post_script(guid, lines):
     """lines = [(uid, text), ...], posted with human-ish gaps."""
     for i, (uid, text) in enumerate(lines):
         if i:
             await asyncio.sleep(random.uniform(1.2, 2.5))
         await asyncio.to_thread(send_text, uid, guid, text)
+        remember(guid, UID_TO_FILE.get(uid, uid), text)
         log(f"posted {uid}: {text}")
 
 
@@ -65,12 +78,42 @@ def is_blame(text):
     return bool(BLAME.search(text))
 
 
+ERROR_PHRASE = re.compile(r"\b(what\s+failed|which\s+test|traceback)\b", re.I)
+FIX = re.compile(r"\b(fix|solve|solution|repair|how\s+do\s+i|what\s+now|undo)\b", re.I)
+ERROR = re.compile(r"\b(error|what['’]?s\s+wrong|why)\b", re.I)
+NAMED = re.compile(r"@?\b(" + "|".join(re.escape(f[:-3]) for f in MEMBER_FILES) + r")(?:\.py)?\b", re.I)
+
+
+def intent(text):
+    """blame | fix | error | chat. Error phrases first ("what failed" also says "failed")."""
+    if ERROR_PHRASE.search(text):
+        return "error"
+    if FIX.search(text):
+        return "fix"
+    if is_blame(text):
+        return "blame"
+    if ERROR.search(text):
+        return "error"
+    return "chat"
+
+
+async def grounded_facts(guid, evidence=None):
+    """Facts for this take, recomputed only when HEAD moved."""
+    head = await asyncio.to_thread(git, "rev-parse", "--short", "HEAD")
+    cached = FACTS.get(guid)
+    if evidence is None and cached and cached[0] == head:
+        return cached[1]
+    facts = await asyncio.to_thread(find_culprit, evidence=evidence)
+    FACTS[guid] = (head, facts)
+    return facts
+
+
 async def ground_and_post(guid):
     async with SCRIPT_LOCK:
         log("grounding…")
         evidence = []
         try:
-            facts = await asyncio.to_thread(find_culprit, evidence=evidence)
+            facts = await grounded_facts(guid, evidence)
         except Exception as e:
             for line in evidence:
                 log(line)
@@ -107,22 +150,97 @@ async def banter_lines(facts):
     return None
 
 
-async def locked_script(guid, lines):
+async def fix_and_post(guid):
+    """Grounded: the culprit spells out the fix computed by ground.py."""
     async with SCRIPT_LOCK:
+        try:
+            failed, passed, _ = await asyncio.to_thread(failures)
+            log(f"pytest: {failed} failed, {passed} passed")
+            cached = FACTS.get(guid)
+            if not failed:
+                speaker = cached[1]["culprit"] if cached else "db.py"
+                lines = green_line(speaker, "tests are already green ✅ nothing to fix")
+            else:
+                facts = await grounded_facts(guid)
+                log(f"fix: {facts['culprit']} L{facts['line']} remove {facts['code_fragment']!r}")
+                lines = fix_lines(facts)
+        except Exception as e:
+            log(f"fix failed: {e}")
+            return
         await post_script(guid, lines)
+
+
+def call_owner(source, facts=None):
+    """Member whose function the failing assertion calls (auth.login -> auth.py)."""
+    for mod in re.findall(r"\b(\w+)\.\w+\(", source or ""):
+        if f"{mod}.py" in MEMBER_FILES:
+            return f"{mod}.py"
+    return ((facts or {}).get("suspects") or ["auth.py"])[0]
+
+
+async def error_and_post(guid):
+    """Grounded: re-run pytest, read out the failing test and its assertion."""
+    async with SCRIPT_LOCK:
+        try:
+            failed, passed, fails = await asyncio.to_thread(failures)
+        except Exception as e:
+            log(f"error check failed: {e}")
+            return
+        log(f"pytest: {failed} failed, {passed} passed")
+        if not failed or not fails:
+            await post_script(guid, green_line("auth.py"))
+            return
+        cached = FACTS.get(guid)
+        owner = call_owner(fails[0]["source"], cached[1] if cached else None)
+        log(f"failing: {fails[0]['test']} at {fails[0]['where']} (owner {owner})")
+        await post_script(guid, error_lines(fails[0], owner))
+
+
+async def chat_and_post(guid, history, text):
+    """Free chat: personality only. LLM -> strict chat validator -> retry once -> persona pool."""
+    async with SCRIPT_LOCK:
+        m = NAMED.search(text)
+        addressed = f"{m.group(1).lower()}.py" if m else None
+        lines = None
+        if llm.mode() != "template":
+            log(f"llm: {llm.mode()} chat …" + (f" (addressed {addressed})" if addressed else ""))
+            hint = None
+            for attempt in (1, 2):
+                t0 = time.perf_counter()
+                try:
+                    messages = await asyncio.to_thread(llm.chat, history, text, addressed, hint)
+                except Exception as e:
+                    log(f"llm: attempt {attempt} error: {e}")
+                    break
+                ok, reason = validate_chat(messages, first=addressed)
+                if ok:
+                    log(f"llm: attempt {attempt} valid ({time.perf_counter() - t0:.1f}s, {len(messages)} messages)")
+                    lines = llm.to_lines(messages)
+                    break
+                log(f"llm: attempt {attempt} invalid: {reason}")
+                hint = reason
+            if lines is None:
+                log("→ template fallback")
+        await post_script(guid, lines or chat_fallback(addressed))
 
 
 @app.post("/ask")
 async def ask(body: Ask):
     guid = body.guid or state.load().get("guid")
-    log(f"atul asked: {body.text!r} (group {guid})")
-    if is_blame(body.text):
+    kind = intent(body.text)
+    log(f"atul asked: {body.text!r} (group {guid}) → {kind}")
+    history = list(HISTORY[guid])
+    remember(guid, "atul", body.text)
+    if kind == "blame":
         asyncio.create_task(ground_and_post(guid))
         return {"ok": True, "grounding": True}
-    # Not a blame question: db.py hints at what to ask.
-    lines = [("db_py", "db.py here 😴 if something's broken, ask us who broke it.")]
-    asyncio.create_task(locked_script(guid, lines))
-    return {"ok": True, "queued": len(lines)}
+    if kind == "fix":
+        asyncio.create_task(fix_and_post(guid))
+    elif kind == "error":
+        asyncio.create_task(error_and_post(guid))
+    else:
+        asyncio.create_task(chat_and_post(guid, history, body.text))
+    return {"ok": True, "intent": kind}
 
 
 def member_changes(commit):

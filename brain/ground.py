@@ -63,6 +63,27 @@ def plain_failing_tests():
     return re.findall(r"^FAILED (\S+)", out, re.M), out
 
 
+def failures():
+    """pytest --tb=line -rf -> (failed, passed, [{"test", "message", "where", "source"}])."""
+    out = run(PYTEST + ["--tb=line", "-rf"], check=False)
+    count = lambda word: int((re.search(rf"(\d+) {word}", out) or [0, 0])[1])
+    locs = re.findall(r"^(.+?\.py):(\d+): ", out, re.M)
+    fails = []
+    for i, m in enumerate(re.finditer(r"^FAILED (\S+)(?: - (.*))?$", out, re.M)):
+        info = {"test": m.group(1), "message": (m.group(2) or "").strip(), "where": None, "source": None}
+        if i < len(locs):
+            path, n = locs[i]
+            rel = os.path.relpath(os.path.realpath(path), os.path.realpath(REPO)).replace(os.sep, "/")
+            info["where"] = f"{rel}:{n}"
+            try:
+                with open(os.path.join(REPO, rel), encoding="utf-8") as f:
+                    info["source"] = f.read().splitlines()[int(n) - 1].strip()
+            except (OSError, IndexError):
+                pass
+        fails.append(info)
+    return count("failed"), count("passed"), fails
+
+
 HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
