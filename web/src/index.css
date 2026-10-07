@@ -3,6 +3,7 @@
 @import "@fontsource/ibm-plex-sans/600.css";
 @import "@fontsource-variable/jetbrains-mono";
 @import "./blamechat.css";
+@import "./panels.css";
 
 html, body { margin: 0; padding: 0; height: 100%; }
 body { background: var(--bc-ink); color: var(--bc-text); font: 400 15px/1.5 var(--bc-sans); }

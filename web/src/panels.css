@@ -1,0 +1,284 @@
+/* Three-panel shell: [ In the room ] [ the CometChat chat ] [ Evidence ].
+   Same Blame Gutter world: ink and hairlines, file hues for identity only, diff red/green only for
+   the culprit line and test state. The panels are read-only mirrors of the brain's /events stream. */
+
+.bc-shell {
+  --room-w: clamp(200px, 17vw, 240px);
+  --ev-w: clamp(288px, 26vw, 360px);
+  display: grid;
+  grid-template-columns: var(--room-w) minmax(0, 1fr) var(--ev-w);
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bc-ink);
+}
+.bc-shell > * { min-width: 0; min-height: 0; }
+
+/* ---------- Shared panel frame ---------- */
+.bc-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  background: var(--bc-ink);
+}
+.bc-room { border-right: 1px solid var(--bc-line); }
+/* Evidence is machine output, so it sits on the code well, like the receipt. */
+.bc-evidence { border-left: 1px solid var(--bc-line); background: var(--bc-code-bg); }
+.bc-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--bc-line);
+  background: var(--bc-ink);
+}
+.bc-panel__title {
+  margin: 0;
+  font: 600 13px/1.2 var(--bc-mono);
+  color: var(--bc-text);
+  white-space: nowrap;
+}
+
+/* ---------- In the room ---------- */
+.bc-room__count {
+  margin-left: auto;
+  font: 500 12px/1 var(--bc-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-text-3);
+}
+.bc-room__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 8px;
+  list-style: none;
+  overflow-y: auto;
+}
+.bc-room__member {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 6px;
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bc-room__member[data-tone="red"] { background: color-mix(in srgb, var(--bc-red) 8%, transparent); }
+.bc-room__member[data-tone="green"] { background: color-mix(in srgb, var(--bc-green) 6%, transparent); }
+.bc-room .bc-badge { margin-top: 0; }
+.bc-badge--human { --hue: var(--bc-text-2); }
+.bc-room__badge { position: relative; display: block; width: 30px; height: 30px; }
+.bc-room__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bc-room__name {
+  font: 600 13px/1.2 var(--bc-mono);
+  color: var(--hue, var(--bc-text));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bc-room__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 400 12px/1.3 var(--bc-mono);
+  color: var(--bc-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bc-room__status[data-tone="quiet"] { color: var(--bc-text-3); }
+.bc-room__status[data-tone="red"] { color: var(--bc-red); font-weight: 500; }
+.bc-room__status[data-tone="green"] { color: var(--bc-green); font-weight: 500; }
+.bc-room__check { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* Status mark on the badge: what's left of the status once the room collapses to a strip. */
+.bc-room__mark {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  border: 2px solid var(--bc-ink);
+  background: var(--bc-text-3);
+}
+.bc-room__mark[data-tone="red"] { background: var(--bc-red); }
+.bc-room__mark[data-tone="green"] { background: var(--bc-green); }
+/* You: presence, not test state, so it stays neutral. */
+.bc-room__presence {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--bc-ink);
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--bc-text-3);
+}
+.bc-room__presence[data-online="true"] { background: var(--bc-text); box-shadow: none; }
+
+/* ---------- Evidence ---------- */
+.bc-evidence__head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font: 400 12px/1.3 var(--bc-sans);
+  color: var(--bc-text-3);
+  white-space: nowrap;
+}
+.bc-evidence__empty {
+  margin: 0;
+  padding: 16px;
+  font: 400 13px/1.5 var(--bc-sans);
+  color: var(--bc-text-3);
+  max-width: 34ch;
+}
+.bc-evidence__empty code { font: 500 12px/1.4 var(--bc-mono); color: var(--bc-text-2); }
+.bc-evidence__list {
+  margin: 0;
+  padding: 8px 0 16px;
+  list-style: none;
+  overflow: hidden auto;
+  flex: 1;
+}
+.bc-ev {
+  display: grid;
+  grid-template-columns: 58px 14px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  padding: 7px 16px;
+}
+/* Steps that belong to one action read as one block: a little air before each new question or commit. */
+.bc-ev[data-kind="asked"], .bc-ev[data-kind="commit"] { margin-top: 10px; padding-top: 11px; border-top: 1px solid var(--bc-line); }
+.bc-ev:first-child { margin-top: 0; border-top: 0; }
+.bc-ev__time {
+  font: 400 11.5px/18px var(--bc-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-text-3);
+}
+.bc-ev__icon {
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--bc-text-2);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bc-ev[data-kind="pytest"] .bc-ev__icon,
+.bc-ev[data-kind="blame"] .bc-ev__icon,
+.bc-ev[data-kind="ran"] .bc-ev__icon { stroke: var(--bc-text); }
+.bc-ev__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.bc-ev__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font: 500 13px/18px var(--bc-sans);
+  color: var(--bc-text);
+}
+.bc-ev__tool { font: 500 12.5px/18px var(--bc-mono); }
+.bc-ev__facts { display: flex; flex-wrap: wrap; gap: 4px; }
+.bc-ev__chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--bc-line);
+  background: var(--bc-panel);
+  font: 500 11.5px/1.45 var(--bc-mono);
+  color: var(--bc-text);
+  max-width: 100%; /* a long chip wraps at its spaces; facts are never cut off */
+}
+.bc-ev__chip--file { color: var(--hue, var(--bc-text)); }
+.bc-ev__line { color: var(--bc-text-2); }
+.bc-ev__chip[data-tone="red"] {
+  color: var(--bc-red);
+  border-color: color-mix(in srgb, var(--bc-red) 45%, transparent);
+  background: color-mix(in srgb, var(--bc-red) 10%, transparent);
+}
+.bc-ev__chip[data-tone="green"] {
+  color: var(--bc-green);
+  border-color: color-mix(in srgb, var(--bc-green) 45%, transparent);
+  background: color-mix(in srgb, var(--bc-green) 10%, transparent);
+}
+.bc-ev__note { min-width: 0; }
+.bc-ev__path {
+  font: 400 11.5px/1.4 var(--bc-mono);
+  color: var(--bc-text-2);
+  overflow-wrap: break-word; /* only when a segment alone is wider than the panel */
+}
+.bc-ev__quote { font: 400 13px/1.4 var(--bc-sans); color: var(--bc-text-2); }
+
+/* ---------- Header controls ---------- */
+.bc-header-end { display: inline-flex; align-items: center; gap: 8px; }
+.bc-evidence-toggle,
+.bc-icon-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bc-line);
+  background: transparent;
+  font: 500 13px/1 var(--bc-mono);
+  color: var(--bc-text-2);
+  cursor: pointer;
+}
+.bc-icon-btn { display: inline-flex; width: 28px; padding: 0; }
+.bc-evidence-toggle svg,
+.bc-icon-btn svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.bc-evidence-toggle:hover, .bc-icon-btn:hover,
+.bc-evidence-toggle[aria-expanded="true"] { background: var(--bc-raised); color: var(--bc-text); }
+.bc-evidence-toggle:focus-visible, .bc-icon-btn:focus-visible,
+.bc-panel :focus-visible { outline: 2px solid var(--bc-hue-0); outline-offset: 2px; }
+
+/* ---------- Below ~1000px: the room collapses to a strip of badges ---------- */
+@media (max-width: 999px) {
+  .bc-shell { --room-w: 56px; }
+  .bc-room .bc-panel__head { justify-content: center; padding: 0; }
+  .bc-room .bc-panel__title {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .bc-room__count { margin: 0; }
+  .bc-room__list { padding: 10px 0; align-items: center; gap: 8px; }
+  .bc-room__member { grid-template-columns: 30px; padding: 6px; }
+  .bc-room__text { display: none; }
+}
+
+/* ---------- Below ~760px: Evidence becomes a drawer behind the header toggle ---------- */
+@media (max-width: 759px) {
+  .bc-shell { grid-template-columns: var(--room-w) minmax(0, 1fr); }
+  .bc-evidence-toggle { display: inline-flex; }
+  .bc-evidence {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 10;
+    width: min(360px, calc(100vw - 56px));
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.35s;
+  }
+  .bc-shell[data-evidence-open] .bc-evidence {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* Phone width: the chat needs every pixel; the roster lives in the group itself. */
+@media (max-width: 520px) {
+  .bc-shell { grid-template-columns: minmax(0, 1fr); }
+  .bc-room { display: none; }
+  .bc-evidence { width: 100vw; }
+  .bc-evidence-toggle { padding: 0 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bc-room__member, .bc-room__status, .bc-evidence { transition: none !important; }
+}

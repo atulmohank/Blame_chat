@@ -214,7 +214,7 @@ Five identity hues, one per file slot, assigned by `data-hue` 0-4. Unknown files
 
 ## Layout
 
-A single full-height column (`100dvh`): 44px header, message list filling the remaining height, composer pinned at the bottom with a 1px hairline above it. No sidebars, no group list, no thread panes. Incoming messages sit left with a 30px file badge as the leading view and the sender name above the bubble; outgoing (the human) sit right with no badge. The list gets 12px block padding; bubbles hug their content. Per-bubble timestamps, receipts, date separators, sticky dates and group action messages are all hidden: in a 90-second recording they are noise.
+Three full-height columns (`100dvh`): **In the room** (left, `clamp(200px, 17vw, 240px)`), the chat (center), **Evidence** (right, `clamp(288px, 26vw, 360px)`), split by hairlines. Each side panel opens with a 44px head that lines up with the kit header. The chat column is the real kit: 44px header, message list filling the remaining height, composer pinned at the bottom with a 1px hairline above it. No group list, no thread panes. Recording sizes are 1350×900 (chat ≈770px) and 1100×900 (chat ≈612px). Below 1000px the room collapses to a 56px strip of badges; below 760px Evidence becomes a right-hand drawer opened from an "Evidence" button beside the pytest pill (Escape closes it); at 520px and below the room strip is hidden. Incoming messages sit left with a 30px file badge as the leading view and the sender name above the bubble; outgoing (the human) sit right with no badge. The list gets 12px block padding; bubbles hug their content. Per-bubble timestamps, receipts, date separators, sticky dates and group action messages are all hidden: in a 90-second recording they are noise.
 
 The primary viewport is ~850 CSS px (the recording width); wider desktop simply gives the column more room. At 520px and below, the header title shrinks to 14px and ellipsizes, the pill drops its "pytest" tool label and tightens, and the receipt's diff and chips step down a size. The receipt's code fragment may wrap only before a `.` in a call chain, never inside a token.
 
@@ -260,6 +260,12 @@ The one bubble that changes register. The stock text bubble still renders the me
 
 ### Evidence Chips
 Tool names as tags: Panel Slate, 1px Hairline, 4px radius, padding 2px 7px, mono 11.5px in Text Primary. Static; they name where facts came from (`pytest`, `git`).
+
+### In the Room (side panel)
+Read-only roster of the real CometChat group members: atul first (neutral badge, "you, online" with a neutral presence dot, since presence is not test state), then the five files in gutter order with their file badge and mono name in the file hue. Under each file, a mono 12px status from the brain's `room` event, derived from `find_culprit`'s facts: `culprit · L6` in Diff Red on a Diff Red 8% row, `changed, never ran` and `ran in test` in Text Secondary, `bystander` and `not checked yet` in Text Tertiary, and after a green commit a stroked check plus `green` in Diff Green on a Diff Green 6% row. A 9px status mark on the badge corner (red or green only) keeps the status readable once the panel collapses to its strip.
+
+### Evidence (side panel)
+A read-only timeline of the brain's steps from `GET /events`, on Code Well (machine output, like the receipt). The head shows "Evidence" and `tinyshop HEAD` with the hash as a chip; it follows commit events. Each row: the brain's own `HH:MM:SS` (mono 11.5px, tabular, Text Tertiary), a 14px stroked icon per step kind, a sans 13px label with tool names in mono, and the facts as code chips (file chips in that file's hue, test counts in Diff Red or Diff Green, hashes and "commit 1 of 3, not HEAD" neutral). Each new question or commit starts a block with a hairline above it. Rows appear exactly when the brain emits them, with no added delay or entrance animation; the list stays pinned to the newest step unless the viewer scrolls up. Status and room events are not repeated here; the pill and the room show them.
 
 ### Composer
 The kit composer reduced to input and send: attachments, emoji, voice, stickers and live reactions hidden by props. Editor Ink, square corners, 1px Hairline top border, body type, placeholder "Ask the files… e.g. who broke login?", Diff Green caret.
