@@ -1,7 +1,23 @@
+# secrets
 .env
 **/.env
+!**/.env.example
+
+# deps / caches
 node_modules/
 __pycache__/
 .pytest_cache/
 *.pyc
+
+# demo repo (recreate with: python brain/make_tinyshop.py)
 tinyshop/
+
+# Claude Code: only the shared settings.json is committed
+.claude/*
+!.claude/settings.json
+
+# tooling output
+.playwright-mcp/
+.impeccable/review/
+*.log
+logs/
