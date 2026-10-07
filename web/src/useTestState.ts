@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CometChat } from "@cometchat/chat-sdk-javascript";
 import { BRAIN_URL, MY_UID } from "./config";
+import { onBrainEvent } from "./brainEvents";
 
 export type TestState = "unknown" | "failing" | "passing";
 export type TestStatus = {
@@ -35,7 +36,14 @@ export function useTestState(guid: string): TestStatus {
         if (message.getReceiverId() === guid && message.getSender()?.getUid() !== MY_UID) refresh();
       },
     }));
-    return () => CometChat.removeMessageListener(listenerId);
+    // CometChat no longer pushes the brain's REST posts; the brain's own "posted" event does.
+    const stop = onBrainEvent(({ event, replay }) => {
+      if (!replay && event.kind === "posted" && event.refs.guid === guid) refresh();
+    });
+    return () => {
+      CometChat.removeMessageListener(listenerId);
+      stop();
+    };
   }, [guid, refresh]);
 
   return status;

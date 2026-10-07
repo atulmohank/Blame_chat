@@ -105,6 +105,49 @@ def test_confession_carries_computed_facts_as_metadata():
     assert meta["blamechat"]["evidence"] == ["pytest trace", "git diff", "git blame"]
 
 
+def _fresh_events(monkeypatch, take):
+    monkeypatch.setattr(server.events, "HISTORY", [])
+    monkeypatch.setattr(server.events, "TAKE", take)
+    monkeypatch.setattr(server.events, "current_take", lambda: take)
+
+
+def test_posted_event_carries_the_cometchat_message_id(monkeypatch):
+    _fresh_events(monkeypatch, 7)
+    monkeypatch.setattr(server, "send_text", lambda uid, guid, text, metadata=None: {"id": 412, "text": text})
+    asyncio.run(server.post_script("repo-tinyshop-t7", [("utils_py", "that was me")]))
+    _, event = server.events.HISTORY[-1]
+    assert event["kind"] == "posted" and event["take"] == 7
+    assert event["refs"]["id"] == 412 and event["refs"]["file"] == "utils.py"
+    assert event["text"] == "posted utils_py: that was me"
+
+
+def test_new_take_clears_the_event_history(monkeypatch):
+    _fresh_events(monkeypatch, 7)
+    server.log("grounding…", "grounding")
+    assert len(server.events.HISTORY) == 1
+    monkeypatch.setattr(server.events, "current_take", lambda: 8)  # reset_take.py ran
+    server.log("atul asked: 'hi'", "asked")
+    assert [e["take"] for _, e in server.events.HISTORY] == [8]
+
+
+def test_green_commit_turns_the_room_green(monkeypatch):
+    sent, _, _ = _fake_commit_world(monkeypatch, failed=0, passed=5)
+    _fresh_events(monkeypatch, 7)
+    asyncio.run(server.react_to_commit("abc1234"))
+    kinds = [e["kind"] for _, e in server.events.HISTORY]
+    assert kinds[:4] == ["commit", "pytest", "status", "last_green"]
+    room = next(e for _, e in server.events.HISTORY if e["kind"] == "room")
+    assert {m["status"] for m in room["refs"]["members"]} == {"green"}
+
+
+def test_room_statuses_come_from_the_facts():
+    facts = {"culprit": "utils.py", "line": 6, "commit": "4278cfe", "suspects": ["auth.py", "utils.py"],
+             "changed_not_run": [{"file": "cart.py", "commit": "9c1d2e3"}], "bystanders": ["db.py", "cart.py", "api.py"]}
+    room = {m["file"]: m["status"] for m in server.room_from_facts(facts)}
+    assert room == {"auth.py": "ran", "db.py": "bystander", "utils.py": "culprit",
+                    "cart.py": "changed-not-run", "api.py": "bystander"}
+
+
 def test_no_metadata_when_culprit_does_not_speak_last():
     facts = {"culprit": "utils.py", "commit": "4278cfe", "method": "bisect"}
     lines = [("utils_py", "hmm"), ("auth_py", "not me")]

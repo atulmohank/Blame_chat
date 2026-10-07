@@ -11,6 +11,7 @@ import { BlameTextPlugin } from "./BlamePlugin";
 import { Mark, TestPill, Title } from "./Header";
 import { useTestState } from "./useTestState";
 import { useListReady, useStartAtNewest } from "./useListReady";
+import { LiveDelivery } from "./LiveDelivery";
 
 const PLUGINS = [BlameTextPlugin];
 
@@ -64,6 +65,7 @@ function Chat({ group }: { group: CometChat.Group }) {
 
   return (
     <CometChatProvider theme="dark" plugins={PLUGINS}>
+      <LiveDelivery guid={group.getGuid()} />
       <div className="chat">
         <CometChatMessageHeader
           group={group}
